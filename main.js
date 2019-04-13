@@ -1,88 +1,93 @@
-//Creating a constructor for all the stores
 
-let Store = function (name, location, storeOpens, storeCloses, customers, price, minCookieSold, maxCookieSold) {
+let storeArray = [];
+
+let mainTable = document.getElementById("store-table");
+let storeForm = document.getElementById("store-form");
+
+//Constructor
+
+
+let Store = function (name, location, employees, storeOpens, storeCloses,salePerHour, minCustPerHour, maxCustPerHour) {
     this.name = name;
     this.location = location;
+    this.employees = employees;
     this.storeOpens = storeOpens;
     this.storeCloses = storeCloses;
-    this.customers = customers;
-    this.price = price;
-    this.minCookieSold = minCookieSold;
-    this.maxCookieSold = maxCookieSold;
+    this.salePerHour = salePerHour;
+    this.minCustPerHour = minCustPerHour;
+    this.maxCustPerHour = maxCustPerHour;
     this.totalSellPerDay = 0;
     this.salePerHourArray = [];
     this.getRevenuesPerStorePerHour = function() {
-        return Math.floor(Math.random() * (this.maxCookieSold - this.minCookieSold)) + this.minCookieSold * this.price;
+        return Math.floor(Math.random() * (this.maxCustPerHour - this.minCustPerHour)) + this.minCustPerHour * this.salePerHour;
 
     }
 };
 
-let storeArray = [];
-
-let CookieStoreOne = new Store ("ButterCo Store", "Silver Spring", 6, 20, 100, 5, 300, 500);
+let CookieStoreOne = new Store ("ButterCo Store", "Silver Spring", 5, 6, 20, 100, 59, 78);
 
 
-let CookieStoreTwo = new Store ("AnimalCo Store", "Bethesda", 6, 20, 85, 7, 200, 400);
+let CookieStoreTwo = new Store ("AnimalCo Store", "Bethesda", 4, 6, 20, 85, 47, 68);
 
 
-let CookieStoreThree = new Store ("VanillaCo Store", "RockVille", 6, 20, 70, 5, 100, 300);
+let CookieStoreThree = new Store ("VanillaCo Store", "RockVille", 4, 6, 20, 70, 35, 59);
 
 storeArray.push(CookieStoreOne, CookieStoreTwo, CookieStoreThree);
 
 storeArray = [CookieStoreOne, CookieStoreTwo, CookieStoreTwo];
 
-let elTable = document.getElementById("store-table");
-
-
-let hoursArray = ["", "6:00 am", "7:00 am", "8:00 am", "9:00 am", "10:00 am", "11:00 am", "12:00 pm", "1:00 pm", "2:00 pm", "3:00 pm", "4:00 pm", "5:00 pm", "6:00 pm", "7:00 pm", "Daily location total"];
 
 
 // create a function that display the table heading
 
-function displayHeading () {
-    let elRowHeader = document.createElement("tr");
-    elTable.appendChild(elRowHeader);
-    for (let i = 0; i < hoursArray.length; i++) {
-        let elTableHours = document.createElement("th");
-        elRowHeader.appendChild(elTableHours).innerHTML = hoursArray[i];
+
+function displayTabHeader() {
+    let headRow = document.createElement('tr');
+    mainTable.appendChild(headRow);
+    let nameHeader = document.createElement("th");
+    headRow.appendChild(nameHeader).innerHTML = "Cookie Stores"
+
+    for (let i = 6; i < 21; i++) {
+        let timeHeader = document.createElement("th");
+        headRow.appendChild(timeHeader);
+        timeHeader.innerHTML = i + ":00 Hours";
     }
 }
 
-displayHeading();
 
-// create a function that display cookiesolds
+// create a function that display data in a table
 
-function displayTotalCookieSold (store) {
+function displayTotalSale (store) {
 
-    let elRowPopulate = document.createElement("tr");
-    elTable.appendChild(elRowPopulate);
+    let storeRow = document.createElement("tr");
+    mainTable.appendChild(storeRow);
 
-    let storeName = document.createElement("th");
-    elRowPopulate.appendChild(storeName).innerHTML = store.name;
+    let storeHeader = document.createElement("th");
+    storeRow.appendChild(storeHeader).innerHTML = store.name;
 
     for (let i = store.storeOpens; i < store.storeCloses; i++) {
 
         let result = store.getRevenuesPerStorePerHour();
 
         let storeHourlyData = document.createElement("td");
-        elRowPopulate.appendChild(storeHourlyData).innerHTML = result;
+        storeRow.appendChild(storeHourlyData).innerHTML = result;
 
         store.totalSellPerDay += result;
+        store.salePerHourArray.push(result);
     }
 
-    let dailyLocationTotal = document.createElement("td");
-    elRowPopulate.appendChild(dailyLocationTotal).innerHTML = store.totalSellPerDay;
+    let dailyTotalTable = document.createElement("td");
+    storeRow.appendChild(dailyTotalTable).innerHTML = store.totalSellPerDay;
 }
 
-displayTotalCookieSold(CookieStoreOne);
-displayTotalCookieSold(CookieStoreTwo);
-displayTotalCookieSold(CookieStoreThree);
+
 
 // Create a function that displays the footer
 
 function displayFooter () {
     let footerRow = document.createElement("tr");
-    elTable.appendChild(footerRow);
+    mainTable.appendChild(footerRow);
+    footerRow.setAttribute("class", "grand-total");
 
     let footerTitle = document.createElement("th");
     footerRow.appendChild(footerTitle).innerHTML = "Total";
@@ -94,6 +99,7 @@ function displayFooter () {
 
         for (let j = 0; j < storeArray.length; j++) {
             totalSalePerHour += storeArray[j].salePerHourArray[i];
+            console.log("inner for loop", storeArray[j].name, j);
         }
     
 
@@ -102,24 +108,43 @@ function displayFooter () {
         total += totalSalePerHour;
     }
 
+    console.log(total);
+
     let totalSalePerDayFooter = document.createElement("th");
     footerRow.appendChild(totalSalePerDayFooter).innerHTML = total;
 }
 
-displayFooter();
 
 // Building forms + eventListeners
 
-let storeForm = document.getElementById("store-form");
+let salePerHour = storeForm.salePerHour;
 
 let storeName = storeForm.storeName;
 
 function CreateNewStore(event){
     event.preventDefault();
-    let newStore = new Store (storeName.value, "Silver Spring", 6, 20, 97, 8, 250, 450);
-    console.log(newStore);
-    displayTotalCookieSold(newStore);
+
+    console.log("event firing", mainTable.childNodes);
+    mainTable.removeChild(mainTable.childElementCount[mainTable.childNodes.length - 1]);
+    let newStore = new Store (storeName.value, "Silver Spring", 3, 6, 20, 97, 43, 84);
+
+    storeArray.push(newStore);
+    displayTotalSale(newStore);
+
+    displayFooter();
 }
 
 
 storeForm.addEventListener("submit", CreateNewStore);
+console.log(storeForm.storeName);
+
+function populateTab() {
+    displayTabHeader();
+
+    for (let i = 0; i < storeArray.length; i++) {
+        displayTotalSale(storeArray[i]);
+    }
+    displayFooter();
+}
+
+populateTab ();
